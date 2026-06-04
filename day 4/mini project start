@@ -1,0 +1,60 @@
+Mini Project Start
+Project Name:
+Product Review Sentiment Analyzer – E-commerce
+Dataset:
+Amazon Product Reviews Dataset (10,000 reviews)
+Features (X Columns):
+1.	Review Text 
+2.	Review Length (number of words/characters) 
+3.	Verified Purchase Status 
+4.	Product Rating (1–5 stars) 
+Target (y Column):
+Sentiment Category
+•	Positive 
+•	Neutral 
+•	Negative 
+Question the Model Will Answer:
+Given a customer's product review, can the model automatically determine whether the sentiment expressed is Positive, Neutral, or Negative?
+________________________________________
+Project Overview
+M1: Data Preparation & Exploration
+•	Load 10,000 Amazon reviews 
+•	Perform text cleaning: 
+o	Lowercasing 
+o	Remove punctuation 
+o	Remove special characters 
+o	Remove stopwords using NLTK 
+•	Explore review rating distribution 
+•	Visualize sentiment and rating trends 
+M2: Machine Learning Model
+•	Convert review text into numerical features using TF-IDF Vectorizer 
+•	Train a Naive Bayes Classifier 
+•	Predict: 
+o	Positive 
+o	Neutral 
+o	Negative 
+•	Save trained model as: 
+o	sentiment_model.pkl 
+o	tfidf_vectorizer.pkl 
+M3: Web Application
+•	Build a Flask application 
+•	User pastes a review into a form 
+•	Display: 
+o	Predicted sentiment 
+o	Confidence percentage 
+o	Highlighted words contributing to prediction 
+M4: Deployment
+•	Deploy application online 
+•	Generate live URL 
+•	Demonstrate sentiment prediction with sample reviews 
+________________________________________
+Technology Stack:
+•	Python 
+•	NLTK 
+•	TF-IDF Vectorizer 
+•	Naive Bayes 
+•	Flask 
+•	HTML 
+•	CSS 
+•	JavaScript 
+•	SQLite
