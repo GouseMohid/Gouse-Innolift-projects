@@ -1,0 +1,61 @@
+import pandas as pd
+import joblib
+import nltk
+
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+import re
+
+nltk.download("stopwords")
+
+df = pd.read_csv("data/amazon_reviews_sample.csv")
+
+stop_words = set(stopwords.words("english"))
+
+def clean_text(text):
+    text = str(text).lower()
+    text = re.sub(r"[^a-zA-Z\s]", "", text)
+    words = text.split()
+    words = [word for word in words if word not in stop_words]
+    return " ".join(words)
+
+def rating_to_sentiment(rating):
+    if rating <= 2:
+        return "Negative"
+    elif rating == 3:
+        return "Neutral"
+    else:
+        return "Positive"
+
+df["cleaned_review"] = df["review"].apply(clean_text)
+df["sentiment"] = df["rating"].apply(rating_to_sentiment)
+
+X = df["cleaned_review"]
+y = df["sentiment"]
+
+vectorizer = TfidfVectorizer()
+X_vectorized = vectorizer.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_vectorized,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+model = MultinomialNB()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+
+joblib.dump(model, "model.pkl")
+joblib.dump(vectorizer, "vectorizer.pkl")
+
+print("model.pkl saved successfully")
+print("vectorizer.pkl saved successfully")
