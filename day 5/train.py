@@ -1,24 +1,21 @@
 from pathlib import Path
+import pickle
 
-import joblib
+import matplotlib.pyplot as plt
 import nltk
-import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import MultinomialNB
 
-from sentiment_model import clean_text
+from model import clean_reviews, load_dataset, run_eda
 
 
 BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "data"
 MODEL_DIR = BASE_DIR / "models"
-DATASET_PATH = DATA_DIR / "amazon_reviews.csv"
-SAMPLE_DATASET_PATH = DATA_DIR / "amazon_reviews_sample.csv"
-MODEL_PATH = MODEL_DIR / "sentiment_model.pkl"
+CHART_DIR = BASE_DIR / "charts"
+MODEL_PATH = MODEL_DIR / "model.pkl"
 VECTORIZER_PATH = MODEL_DIR / "tfidf_vectorizer.pkl"
-MAX_REVIEWS = 10_000
 
 
 def ensure_nltk_stopwords():
@@ -28,75 +25,102 @@ def ensure_nltk_stopwords():
         nltk.download("stopwords", quiet=True)
 
 
-def find_column(columns, candidates):
-    normalized = {column.lower().strip(): column for column in columns}
-    for candidate in candidates:
-        if candidate in normalized:
-            return normalized[candidate]
-    return None
+def save_charts(reviews):
+    CHART_DIR.mkdir(parents=True, exist_ok=True)
 
-
-def rating_to_sentiment(rating):
-    rating = float(rating)
-    if rating <= 2:
-        return "Negative"
-    if rating == 3:
-        return "Neutral"
-    return "Positive"
-
-
-def load_training_data():
-    dataset_path = DATASET_PATH
-    if not dataset_path.exists():
-        dataset_path = SAMPLE_DATASET_PATH
-        print(f"Full 10K dataset not found. Using sample file: {dataset_path}")
-
-    reviews = pd.read_csv(dataset_path).head(MAX_REVIEWS)
-    text_column = find_column(
-        reviews.columns,
-        ["review", "review_text", "text", "content", "summary"],
+    plt.figure(figsize=(7, 4))
+    sentiment_counts = reviews["sentiment"].value_counts().reindex(
+        ["Negative", "Neutral", "Positive"],
+        fill_value=0,
     )
-    rating_column = find_column(reviews.columns, ["rating", "score", "stars"])
+    plt.bar(sentiment_counts.index, sentiment_counts.values, color=["#d94f45", "#f0b429", "#2f9e44"])
+    plt.title("Sentiment Distribution")
+    plt.xlabel("Sentiment")
+    plt.ylabel("Review Count")
+    plt.grid(axis="y", alpha=0.25)
+    plt.tight_layout()
+    plt.savefig(CHART_DIR / "sentiment_distribution.png", dpi=160)
+    plt.close()
 
-    if text_column is None:
-        raise ValueError("Dataset must include a review text column.")
-    if rating_column is None:
-        raise ValueError("Dataset must include a rating/score/stars column.")
-
-    reviews = reviews[[text_column, rating_column]].rename(
-        columns={text_column: "review", rating_column: "rating"}
+    plt.figure(figsize=(7, 4))
+    rating_means = reviews.groupby("sentiment")["rating"].mean().reindex(
+        ["Negative", "Neutral", "Positive"],
+        fill_value=0,
     )
-    reviews = reviews.dropna(subset=["review", "rating"]).copy()
-    reviews["rating"] = pd.to_numeric(reviews["rating"], errors="coerce")
-    reviews = reviews.dropna(subset=["rating"])
-    reviews["cleaned_review"] = reviews["review"].apply(clean_text)
-    reviews["sentiment"] = reviews["rating"].apply(rating_to_sentiment)
-    reviews = reviews[reviews["cleaned_review"].str.len() > 0]
+    plt.bar(rating_means.index, rating_means.values, color=["#d94f45", "#f0b429", "#2f9e44"])
+    plt.title("Average Rating by Sentiment")
+    plt.xlabel("Sentiment")
+    plt.ylabel("Average Rating")
+    plt.ylim(0, 5)
+    plt.grid(axis="y", alpha=0.25)
+    plt.tight_layout()
+    plt.savefig(CHART_DIR / "rating_by_sentiment.png", dpi=160)
+    plt.close()
 
-    print(f"Loaded training shape: {reviews.shape}")
-    print("\nSentiment distribution:")
-    print(reviews["sentiment"].value_counts())
-    return reviews
+    correlation_frame = reviews.copy()
+    correlation_frame["sentiment_code"] = correlation_frame["sentiment"].map(
+        {"Negative": 0, "Neutral": 1, "Positive": 2}
+    )
+    corr = correlation_frame[["rating", "text_length", "sentiment_code"]].corr()
+    plt.figure(figsize=(6, 4))
+    plt.imshow(corr, cmap="coolwarm", vmin=-1, vmax=1)
+    plt.colorbar(label="Correlation")
+    plt.xticks(range(len(corr.columns)), corr.columns, rotation=30, ha="right")
+    plt.yticks(range(len(corr.index)), corr.index)
+    for row_index, row_name in enumerate(corr.index):
+        for column_index, column_name in enumerate(corr.columns):
+            value = corr.loc[row_name, column_name]
+            plt.text(column_index, row_index, f"{value:.2f}", ha="center", va="center")
+    plt.title("Correlation Heatmap")
+    plt.tight_layout()
+    plt.savefig(CHART_DIR / "correlation_heatmap.png", dpi=160)
+    plt.close()
+
+    print(f"\nSaved chart PNGs to: {CHART_DIR}")
 
 
 def train_model():
     ensure_nltk_stopwords()
-    reviews = load_training_data()
+    raw_reviews = load_dataset()
+    run_eda(raw_reviews)
+    reviews = clean_reviews(raw_reviews)
+
+    print("\nAfter cleaning:")
+    print(f"Shape: {reviews.shape}")
+    print("\nNull counts:")
+    print(reviews.isnull().sum())
+    print(f"\nVerified 0 nulls after cleaning: {reviews.isnull().sum().sum() == 0}")
+    print("\nSentiment distribution:")
+    print(reviews["sentiment"].value_counts())
+    print("\nAverage rating by sentiment:")
+    print(reviews.groupby("sentiment")["rating"].mean())
+
+    save_charts(reviews)
 
     vectorizer = TfidfVectorizer(max_features=6000, ngram_range=(1, 2))
     features = vectorizer.fit_transform(reviews["cleaned_review"])
     labels = reviews["sentiment"]
 
-    stratify = labels if labels.value_counts().min() >= 2 else None
+    min_per_class = labels.value_counts().min()
+    stratify = labels if min_per_class >= 2 else None
+    n_classes = labels.nunique()
+    test_size = max(0.2, n_classes / len(labels))
+    if stratify is not None:
+        test_size = max(test_size, n_classes / max(1, (len(labels) - 1)))
+
     x_train, x_test, y_train, y_test = train_test_split(
         features,
         labels,
-        test_size=0.2,
+        test_size=test_size,
         random_state=42,
         stratify=stratify,
     )
 
-    model = MultinomialNB(alpha=0.5)
+    model = RandomForestClassifier(
+        n_estimators=200,
+        random_state=42,
+        class_weight="balanced",
+    )
     model.fit(x_train, y_train)
 
     predictions = model.predict(x_test)
@@ -107,8 +131,10 @@ def train_model():
     print(classification_report(y_test, predictions, zero_division=0))
 
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
-    joblib.dump(model, MODEL_PATH)
-    joblib.dump(vectorizer, VECTORIZER_PATH)
+    with MODEL_PATH.open("wb") as model_file:
+        pickle.dump(model, model_file)
+    with VECTORIZER_PATH.open("wb") as vectorizer_file:
+        pickle.dump(vectorizer, vectorizer_file)
 
     print(f"Saved model to: {MODEL_PATH}")
     print(f"Saved vectorizer to: {VECTORIZER_PATH}")
