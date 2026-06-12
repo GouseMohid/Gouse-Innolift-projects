@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% set title = "About | Product Review Sentiment Analyzer" %}
+
+{% block content %}
+<section class="page-banner">
+    <p class="eyebrow">About the Project</p>
+    <h1>Product Review Sentiment Analyzer</h1>
+    <p>A Flask and SQLite e-commerce analytics project powered by an Amazon review dataset.</p>
+</section>
+
+<section class="section two-column">
+    <div>
+        <h2>Project Overview</h2>
+        <p>
+            This project imports product reviews from the supplied CSV, stores them in SQLite,
+            trains a simple sentiment classifier from the labeled reviews, and provides a clean
+            web interface for prediction and dataset browsing.
+        </p>
+    </div>
+    <div class="info-card">
+        <h3>Technical Scope</h3>
+        <p><strong>Framework:</strong> Flask</p>
+        <p><strong>Database:</strong> SQLite reviews and analyses tables</p>
+        <p><strong>Model:</strong> Naive Bayes text classifier using dataset labels</p>
+    </div>
+</section>
+
+<section class="section card-grid">
+    <article class="feature-card">
+        <span>A</span>
+        <h3>CSV Import</h3>
+        <p>Loads ProductId, reviewer details, helpfulness, summary, text, and sentiment labels.</p>
+    </article>
+    <article class="feature-card">
+        <span>B</span>
+        <h3>Live Prediction</h3>
+        <p>Scores new review text and saves each prediction with confidence.</p>
+    </article>
+    <article class="feature-card">
+        <span>C</span>
+        <h3>Commerce Dashboard</h3>
+        <p>Displays sentiment split, recent analysis history, and searchable review records.</p>
+    </article>
+</section>
+{% endblock %}

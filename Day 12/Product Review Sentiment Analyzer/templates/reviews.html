@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% set title = "Reviews | Product Review Sentiment Analyzer" %}
+
+{% block content %}
+<section class="page-banner">
+    <p class="eyebrow">Dataset Records</p>
+    <h1>Amazon Product Reviews</h1>
+    <p>Browse imported reviews from the supplied CSV dataset.</p>
+</section>
+
+<section class="section">
+    <form class="filter-bar" action="{{ url_for('reviews') }}" method="get">
+        <input type="search" name="search" placeholder="Search product, summary, or review text" value="{{ search }}">
+        <select name="sentiment">
+            <option {{ "selected" if sentiment == "All" else "" }}>All</option>
+            <option {{ "selected" if sentiment == "Positive" else "" }}>Positive</option>
+            <option {{ "selected" if sentiment == "Negative" else "" }}>Negative</option>
+        </select>
+        <button class="btn secondary" type="submit">Filter</button>
+    </form>
+
+    <div class="table-card">
+        <div class="table-header">
+            <div>
+                <h2>Review List</h2>
+                <p>Showing {{ reviews|length }} matching records</p>
+            </div>
+            <a class="btn primary small" href="{{ url_for('analyze') }}">Analyze New</a>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Sentiment</th>
+                        <th>Summary</th>
+                        <th>Reviewer</th>
+                        <th>Helpful</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for review in reviews %}
+                    <tr>
+                        <td>{{ review.product_id }}</td>
+                        <td><span class="pill {{ review.score|lower }}">{{ review.score }}</span></td>
+                        <td>
+                            <strong>{{ review.summary }}</strong>
+                            <p>{{ review.text[:150] }}{% if review.text|length > 150 %}...{% endif %}</p>
+                        </td>
+                        <td>{{ review.profile_name or "Anonymous" }}</td>
+                        <td>{{ review.helpfulness_numerator }}/{{ review.helpfulness_denominator }}</td>
+                        <td>{{ review.review_time|date_from_epoch }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td class="empty-state" colspan="6">No reviews match your filters.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% set title = "Home | Product Review Sentiment Analyzer" %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <p class="eyebrow">E-commerce Intelligence Portal</p>
+        <h1>Product Review Sentiment Analyzer</h1>
+        <p class="hero-text">
+            Analyze customer feedback, classify reviews as positive or negative, and explore
+            Amazon review trends from the supplied dataset.
+        </p>
+        <div class="hero-actions">
+            <a class="btn primary" href="{{ url_for('analyze') }}">Analyze Review</a>
+            <a class="btn secondary" href="{{ url_for('reviews') }}">View Dataset</a>
+        </div>
+    </div>
+</section>
+
+<section class="section stats-grid">
+    <article class="stat-card">
+        <span>Total Reviews</span>
+        <strong>{{ stats.total }}</strong>
+        <p>Records imported from the Amazon reviews CSV.</p>
+    </article>
+    <article class="stat-card positive">
+        <span>Positive</span>
+        <strong>{{ stats.positive_percent }}%</strong>
+        <p>{{ stats.positive }} reviews marked positive.</p>
+    </article>
+    <article class="stat-card negative">
+        <span>Negative</span>
+        <strong>{{ stats.negative_percent }}%</strong>
+        <p>{{ stats.negative }} reviews marked negative.</p>
+    </article>
+</section>
+
+<section class="section two-column">
+    <div>
+        <p class="eyebrow">Customer Voice</p>
+        <h2>Turn raw review text into useful store signals</h2>
+        <p>
+            The app trains a lightweight Naive Bayes sentiment model from the dataset labels,
+            then uses it to score new customer review text submitted through the analyzer.
+        </p>
+    </div>
+    <div class="info-card">
+        <h3>Recent Analyses</h3>
+        {% if stats.analyses %}
+            {% for item in stats.analyses[:3] %}
+            <p><strong>{{ item.predicted_sentiment }}</strong> at {{ item.confidence }}% confidence</p>
+            {% endfor %}
+        {% else %}
+            <p>No custom analyses yet. Try the analyzer to create the first result.</p>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section card-grid">
+    <article class="feature-card">
+        <span>01</span>
+        <h3>Review Classification</h3>
+        <p>Predict positive or negative sentiment from new customer feedback.</p>
+    </article>
+    <article class="feature-card">
+        <span>02</span>
+        <h3>Dataset Browser</h3>
+        <p>Search and filter imported product reviews by text, summary, product, or sentiment.</p>
+    </article>
+    <article class="feature-card">
+        <span>03</span>
+        <h3>SQLite Storage</h3>
+        <p>Imported reviews and analyzer history are stored in a local SQLite database.</p>
+    </article>
+</section>
+{% endblock %}

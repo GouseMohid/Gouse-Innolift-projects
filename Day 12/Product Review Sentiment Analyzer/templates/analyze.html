@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% set title = "Analyze | Product Review Sentiment Analyzer" %}
+
+{% block content %}
+<section class="page-banner">
+    <p class="eyebrow">Sentiment Desk</p>
+    <h1>Analyze a Product Review</h1>
+    <p>Paste an e-commerce review and get an instant sentiment prediction.</p>
+</section>
+
+<section class="section two-column analysis-layout">
+    <form class="analysis-form" action="{{ url_for('analyze') }}" method="post">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="notice {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <label>
+            Product Name
+            <input type="text" name="product_name" placeholder="Example: Wireless headphones" value="{{ product_name }}">
+        </label>
+        <label>
+            Review Text
+            <textarea name="review_text" rows="9" placeholder="Paste the customer review here..." required>{{ review_text }}</textarea>
+        </label>
+        <div class="form-actions">
+            <button class="btn primary" type="submit">Analyze Sentiment</button>
+            <button class="btn light" type="reset">Clear</button>
+        </div>
+    </form>
+
+    <aside class="result-panel">
+        {% if result %}
+            <p class="eyebrow">Prediction Result</p>
+            <h2 class="{{ result.sentiment|lower }}">{{ result.sentiment }}</h2>
+            <p>{{ result.product_name }}</p>
+            <div class="confidence">
+                <span style="width: {{ result.confidence }}%"></span>
+            </div>
+            <strong>{{ result.confidence }}% confidence</strong>
+        {% else %}
+            <p class="eyebrow">Ready</p>
+            <h2>Waiting for a review</h2>
+            <p>The model compares your words with patterns learned from positive and negative dataset reviews.</p>
+        {% endif %}
+    </aside>
+</section>
+{% endblock %}
