@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Student Registration System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar">
+            <a class="brand" href="{{ url_for('home') }}">City Engineering College</a>
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}">Home</a>
+                <a class="active" href="{{ url_for('register') }}">Register</a>
+                <a href="{{ url_for('student_records') }}">Students</a>
+                <a href="{{ url_for('about') }}">About</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="page-banner">
+            <p class="eyebrow">Student Admission Desk</p>
+            <h1>Register a Student</h1>
+            <p>Enter student details in the official college registration form.</p>
+        </section>
+
+        <section class="section">
+            <form class="registration-form" action="{{ url_for('register') }}" method="post">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="notice {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <div class="form-grid">
+                    <label>
+                        Student Name
+                        <input type="text" name="student_name" placeholder="Enter full name" value="{{ form_data.get('student_name', '') }}" required>
+                    </label>
+                    <label>
+                        Roll Number
+                        <input type="text" name="roll_number" placeholder="Enter roll number" value="{{ form_data.get('roll_number', '') }}" required>
+                    </label>
+                    <label>
+                        Department
+                        <select name="department" required>
+                            <option value="">Select department</option>
+                            <option {% if form_data.get('department') == 'Computer Science Engineering' %}selected{% endif %}>Computer Science Engineering</option>
+                            <option {% if form_data.get('department') == 'Information Technology' %}selected{% endif %}>Information Technology</option>
+                            <option {% if form_data.get('department') == 'Electronics and Communication' %}selected{% endif %}>Electronics and Communication</option>
+                            <option {% if form_data.get('department') == 'Electrical and Electronics' %}selected{% endif %}>Electrical and Electronics</option>
+                            <option {% if form_data.get('department') == 'Mechanical Engineering' %}selected{% endif %}>Mechanical Engineering</option>
+                            <option {% if form_data.get('department') == 'Civil Engineering' %}selected{% endif %}>Civil Engineering</option>
+                        </select>
+                    </label>
+                    <label>
+                        Year
+                        <select name="year" required>
+                            <option value="">Select year</option>
+                            <option {% if form_data.get('year') == '1st Year' %}selected{% endif %}>1st Year</option>
+                            <option {% if form_data.get('year') == '2nd Year' %}selected{% endif %}>2nd Year</option>
+                            <option {% if form_data.get('year') == '3rd Year' %}selected{% endif %}>3rd Year</option>
+                            <option {% if form_data.get('year') == '4th Year' %}selected{% endif %}>4th Year</option>
+                        </select>
+                    </label>
+                    <label>
+                        Email
+                        <input type="email" name="email" placeholder="student@example.com" value="{{ form_data.get('email', '') }}" required>
+                    </label>
+                    <label>
+                        Phone Number
+                        <input type="tel" name="phone" placeholder="Enter phone number" value="{{ form_data.get('phone', '') }}" required>
+                    </label>
+                    <label>
+                        Gender
+                        <select name="gender" required>
+                            <option value="">Select gender</option>
+                            <option {% if form_data.get('gender') == 'Female' %}selected{% endif %}>Female</option>
+                            <option {% if form_data.get('gender') == 'Male' %}selected{% endif %}>Male</option>
+                            <option {% if form_data.get('gender') == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </label>
+                    <label class="full-width">
+                        Address
+                        <textarea name="address" rows="5" placeholder="Enter complete address" required>{{ form_data.get('address', '') }}</textarea>
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button class="btn primary" type="submit">Submit Registration</button>
+                    <button class="btn light" type="reset">Clear Form</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 City Engineering College. Student Registration System.</p>
+    </footer>
+</body>
+</html>

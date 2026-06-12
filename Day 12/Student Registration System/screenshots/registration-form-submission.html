@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students | Student Registration System</title>
+    <link rel="stylesheet" href="http://127.0.0.1:5000/static/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar">
+            <a class="brand" href="/">City Engineering College</a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/register">Register</a>
+                <a class="active" href="/students">Students</a>
+                <a href="/about">About</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="page-banner">
+            <p class="eyebrow">Student Records</p>
+            <h1>Registered Students</h1>
+            <p>Live student records retrieved directly from the SQLite database.</p>
+        </section>
+
+        <section class="section">
+            <div class="table-card">
+                
+                    
+                        
+                        <div class="notice success">Student registered successfully and saved to SQLite.</div>
+                        
+                    
+                
+                <div class="table-header">
+                    <div>
+                        <h2>Student List</h2>
+                        <p>Showing 11 database records</p>
+                    </div>
+                    <a class="btn secondary small" href="/register">Add Student</a>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Year</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Gender</th>
+                                <th>Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr>
+                                <td>CE2026011</td>
+                                <td>Nisha Patel</td>
+                                <td>Civil Engineering</td>
+                                <td>1st Year</td>
+                                <td>nisha.patel@example.com</td>
+                                <td>9876543211</td>
+                                <td>Female</td>
+                                <td>26 Riverfront Road, Ahmedabad</td>
+                            </tr>
+                            
+                            <tr>
+                                <td>CE2026010</td>
+                                <td>Ananya Das</td>
+                                <td>Computer Science Engineering</td>
+                                <td>2nd Year</td>
+                                <td>ananya.das@example.com</td>
+                                <td>9876543210</td>
+                                <td>Female</td>
+                                <td>14 Salt Lake, Kolkata</td>
+                            </tr>
+                            
+                            <tr>
+                                <td>CE2026009</td>
+                                <td>Farhan Ali</td>
+                                <td>Electronics and Communication</td>
+                                <td>3rd Year</td>
+                                <td>farhan.ali@example.com</td>
+                                <td>9876543209</td>
+                                <td>Male</td>
+                                <td>52 Charminar Road, Hyderabad</td>
+                            </tr>
+                            
+                            <tr>
+                                <td>CE2026008</td>
+                                <td>Kavya Nair</td>
+                                <td>Information Technology</td>
+                                <td>4th Year</td>
+                                <td>kavya.nair@example.com</td>
+                                <td>9876543208</td>
+                                <td>Female</td>
+                                <td>30 Marine Drive, Kochi</td>
+                            </tr>
+                            
+                            <tr>
+                                <td>CE2026007</td>
+                                <td>Aditya Rao</td>
+                                <td>Computer Science Engineering</td>
+                                <td>1st Year</td>
+                                <td>aditya.rao@example.com</td>
+                                <td>9876543207</td>
+                                <td>Male</td>
+                                <td>19 Banjara Hills, Hyderabad</td>
+                            </tr>
+                            
+                            <tr>
+                                <td>CE2026006</td>
+                                <td>Meera Joshi</td>
+                                <td>Civil Engineering</td>
+                                <td>2nd Year</td>
+                                <td>meera.joshi@example.com</td>
+                                <td>9876543206</td>
+                                <td>Female</td>
+                                <td>63 Ashok Nagar, Chennai</td>
+                            </tr>
+                            
+                            <tr>
+                                <td>CE2026005</td>
+                                <td>Vikram Singh</td>
+                                <td>Mechanical Engineering</td>
+                                <td>3rd Year</td>
+                                <td>vikram.singh@example.com</td>
+                                <td>9876543205</td>
+                                <td>Male</td>
+                                <td>7 Civil Lines, Jaipur</td>
+                            </tr>
+                            
+                            <tr>
+                                <td>CE2026004</td>
+                                <td>Sneha Reddy</td>
+                                <td>Electrical and Electronics</td>
+                                <td>4th Year</td>
+                                <td>sneha.reddy@example.com</td>
+                                <td>9876543204</td>
+                                <td>Female</td>
+                                <td>21 Jubilee Hills, Hyderabad</td>
+                            </tr>
+                            
+                            <tr>
+                                <td>CE2026003</td>
+                                <td>Rahul Verma</td>
+                                <td>Electronics and Communication</td>
+                                <td>1st Year</td>
+                                <td>rahul.verma@example.com</td>
+                                <td>9876543203</td>
+                                <td>Male</td>
+                                <td>88 MG Road, Pune</td>
+                            </tr>
+                            
+                            <tr>
+                                <td>CE2026002</td>
+                                <td>Priya Sharma</td>
+                                <td>Computer Science Engineering</td>
+                                <td>2nd Year</td>
+                                <td>priya.sharma@example.com</td>
+                                <td>9876543202</td>
+                                <td>Female</td>
+                                <td>45 Green Park, Bengaluru</td>
+                            </tr>
+                            
+                            <tr>
+                                <td>CE2026001</td>
+                                <td>Arjun Kumar</td>
+                                <td>Information Technology</td>
+                                <td>3rd Year</td>
+                                <td>arjun.kumar@example.com</td>
+                                <td>9876543201</td>
+                                <td>Male</td>
+                                <td>12 Lake View Road, Hyderabad</td>
+                            </tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 City Engineering College. Student Registration System.</p>
+    </footer>
+</body>
+</html>

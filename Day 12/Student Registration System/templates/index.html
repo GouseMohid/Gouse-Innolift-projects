@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | Student Registration System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar">
+            <a class="brand" href="{{ url_for('home') }}">City Engineering College</a>
+            <div class="nav-links">
+                <a class="active" href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('register') }}">Register</a>
+                <a href="{{ url_for('student_records') }}">Students</a>
+                <a href="{{ url_for('about') }}">About</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <p class="eyebrow">Academic Administration Portal</p>
+                <h1>Student Registration System</h1>
+                <p class="hero-text">
+                    A Flask and SQLite web application for registering students, storing records,
+                    and viewing live college registration data.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn primary" href="{{ url_for('register') }}">Open Registration</a>
+                    <a class="btn secondary" href="{{ url_for('student_records') }}">View Records</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section two-column">
+            <div>
+                <p class="eyebrow">Welcome</p>
+                <h2>Welcome to City Engineering College</h2>
+                <p>
+                    This system demonstrates Flask route handling, SQLite database integration,
+                    form processing, table creation, data insertion, and dynamic record retrieval.
+                </p>
+            </div>
+            <div class="info-card">
+                <h3>Project Scope</h3>
+                <p>
+                    The registration form saves real student data in SQLite, and the records page displays
+                    the latest database entries.
+                </p>
+            </div>
+        </section>
+
+        <section class="section card-grid">
+            <article class="feature-card">
+                <span>01</span>
+                <h3>Flask Routes</h3>
+                <p>Four working routes connect every page through Flask templates.</p>
+            </article>
+            <article class="feature-card">
+                <span>02</span>
+                <h3>Clean Interface</h3>
+                <p>Responsive navigation, form controls, tables, cards, hover states, and footer styling.</p>
+            </article>
+            <article class="feature-card">
+                <span>03</span>
+                <h3>SQLite Storage</h3>
+                <p>Student submissions are stored in a local SQLite database.</p>
+            </article>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 City Engineering College. Student Registration System.</p>
+    </footer>
+</body>
+</html>
