@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% set title = "Login | ReviewPulse AI" %}
+
+{% block content %}
+<section class="page-banner">
+    <p class="eyebrow">Authentication</p>
+    <h1>Reviewer Login</h1>
+    <p>Use demo Google authentication or phone number authentication before submitting reviews.</p>
+</section>
+
+<section class="section two-column">
+    <div class="analysis-form">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="notice {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <h2>Phone Number Login</h2>
+        <form action="{{ url_for('login') }}" method="post">
+            <input type="hidden" name="auth_method" value="phone">
+            <label>
+                Reviewer Name
+                <input type="text" name="name" placeholder="Enter your name" required>
+            </label>
+            <label>
+                Phone Number
+                <input type="tel" name="phone" placeholder="Example: 9876543210" required>
+            </label>
+            <button class="btn primary" type="submit">Continue with Phone</button>
+        </form>
+    </div>
+
+    <div class="result-panel">
+        <h2>Google Authentication</h2>
+        <p>
+            This is a demo Google login button for presentation. Real Google OAuth needs
+            Google Client ID and Client Secret credentials.
+        </p>
+        <a class="btn primary" href="{{ url_for('demo_google_login') }}">Continue with Google</a>
+        <form class="google-demo-form" action="{{ url_for('login') }}" method="post">
+            <input type="hidden" name="auth_method" value="google">
+            <label>
+                Google Name
+                <input type="text" name="name" placeholder="Reviewer name">
+            </label>
+            <label>
+                Google Email
+                <input type="email" name="email" placeholder="reviewer@gmail.com">
+            </label>
+            <button class="btn light" type="submit">Use Custom Google Demo</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

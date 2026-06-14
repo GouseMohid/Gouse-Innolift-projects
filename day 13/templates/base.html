@@ -15,6 +15,7 @@
                 <a class="{{ 'active' if request.endpoint == 'analyze' else '' }}" href="{{ url_for('analyze') }}">Analyze</a>
                 <a class="{{ 'active' if request.endpoint == 'reviews' else '' }}" href="{{ url_for('reviews') }}">Reviews</a>
                 <a class="{{ 'active' if request.endpoint == 'about' else '' }}" href="{{ url_for('about') }}">About</a>
+                <a class="{{ 'active' if request.endpoint in ['login', 'profile'] else '' }}" href="{{ url_for('profile') }}">Profile</a>
             </div>
         </nav>
     </header>

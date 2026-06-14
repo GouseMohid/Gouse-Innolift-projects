@@ -9,6 +9,36 @@
 </section>
 
 <section class="section dataset-shell">
+    <div class="table-card analytics-card">
+        <div class="table-header">
+            <div>
+                <p class="eyebrow">Sentiment Analytics</p>
+                <h2>Positive vs Negative Review Graph</h2>
+                <p>Dataset sentiment distribution and analyzed review totals.</p>
+            </div>
+        </div>
+        <div class="analytics-grid">
+            <div class="analytics-bars">
+                <div>
+                    <span>Positive Reviews</span>
+                    <strong>{{ analytics.positive }}</strong>
+                    <div class="bar-track"><i class="positive-bar" style="width: {{ analytics.positive_percent }}%"></i></div>
+                </div>
+                <div>
+                    <span>Negative Reviews</span>
+                    <strong>{{ analytics.negative }}</strong>
+                    <div class="bar-track"><i class="negative-bar" style="width: {{ analytics.negative_percent }}%"></i></div>
+                </div>
+            </div>
+            <div class="analytics-summary">
+                <article><span>Average Positive Share</span><strong>{{ analytics.positive_percent }}%</strong></article>
+                <article><span>Average Negative Share</span><strong>{{ analytics.negative_percent }}%</strong></article>
+                <article><span>Saved Positive Analyses</span><strong>{{ analytics.analyzed_positive }}</strong></article>
+                <article><span>Saved Negative Analyses</span><strong>{{ analytics.analyzed_negative }}</strong></article>
+            </div>
+        </div>
+    </div>
+
     <div class="table-card analyzed-card">
         <div class="table-header">
             <div>
@@ -24,6 +54,10 @@
                 <div>
                     <span class="pill {{ item.predicted_sentiment|lower }}"><i></i>{{ item.predicted_sentiment }}</span>
                     <strong>{{ item.product_name or "Untitled product" }}</strong>
+                </div>
+                <div class="reviewer-line">
+                    <span class="reviewer-avatar">{{ (item.reviewer_name or "G")[:1] }}</span>
+                    <strong>{{ item.reviewer_name or "Guest Reviewer" }}</strong>
                 </div>
                 <p>{{ item.review_text }}</p>
                 <small>{{ item.confidence }}% confidence | {{ item.created_at }}</small>
@@ -90,7 +124,13 @@
                                 <p class="review-text short">{{ review.text }}</p>
                             {% endif %}
                         </td>
-                        <td>{{ review.profile_name or "Anonymous" }}</td>
+                        <td>
+                            <div class="reviewer-line">
+                                <span class="reviewer-avatar">{{ (review.profile_name or "A")[:1] }}</span>
+                                <strong>{{ review.profile_name or "Anonymous" }}</strong>
+                            </div>
+                            <small>{{ review.user_id or "No profile ID" }}</small>
+                        </td>
                         <td>{{ review.helpfulness_numerator }}/{{ review.helpfulness_denominator }}</td>
                         <td>{{ review.review_time|date_from_epoch }}</td>
                     </tr>

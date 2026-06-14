@@ -8,7 +8,7 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-from flask import Flask, flash, render_template, request
+from flask import Flask, flash, redirect, render_template, request, session, url_for
 
 try:
     from sklearn.feature_extraction.text import TfidfVectorizer
@@ -73,10 +73,19 @@ def init_db():
                 review_text TEXT NOT NULL,
                 predicted_sentiment TEXT NOT NULL,
                 confidence REAL NOT NULL,
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                reviewer_name TEXT DEFAULT 'Guest Reviewer'
             )
             """
         )
+        columns = [
+            row["name"]
+            for row in conn.execute("PRAGMA table_info(analyses)").fetchall()
+        ]
+        if "reviewer_name" not in columns:
+            conn.execute(
+                "ALTER TABLE analyses ADD COLUMN reviewer_name TEXT DEFAULT 'Guest Reviewer'"
+            )
 
         count = conn.execute("SELECT COUNT(*) FROM reviews").fetchone()[0]
         if count == 0 and CSV_PATH is not None:
@@ -222,6 +231,18 @@ def dashboard_stats():
     }
 
 
+def current_user():
+    return session.get(
+        "user",
+        {
+            "name": "Guest Reviewer",
+            "email": "",
+            "phone": "",
+            "auth_method": "Guest",
+        },
+    )
+
+
 @app.template_filter("date_from_epoch")
 def date_from_epoch(value):
     if not value:
@@ -232,6 +253,62 @@ def date_from_epoch(value):
 @app.route("/")
 def home():
     return render_template("home.html", stats=dashboard_stats())
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        auth_method = request.form.get("auth_method", "phone")
+        if auth_method == "google":
+            name = request.form.get("name", "").strip() or "Google Reviewer"
+            email = request.form.get("email", "").strip() or "reviewer@gmail.com"
+            session["user"] = {
+                "name": name,
+                "email": email,
+                "phone": "",
+                "auth_method": "Google",
+            }
+        else:
+            name = request.form.get("name", "").strip() or "Phone Reviewer"
+            phone = request.form.get("phone", "").strip()
+            if len(phone) < 10:
+                flash("Please enter a valid phone number.", "error")
+                return render_template("login.html")
+            session["user"] = {
+                "name": name,
+                "email": "",
+                "phone": phone,
+                "auth_method": "Phone",
+            }
+
+        flash("Authentication successful.", "success")
+        return redirect(url_for("profile"))
+
+    return render_template("login.html")
+
+
+@app.route("/demo-google-login")
+def demo_google_login():
+    session["user"] = {
+        "name": "Google Demo Reviewer",
+        "email": "reviewer@gmail.com",
+        "phone": "",
+        "auth_method": "Google",
+    }
+    flash("Google demo authentication successful.", "success")
+    return redirect(url_for("profile"))
+
+
+@app.route("/profile")
+def profile():
+    return render_template("profile.html", user=current_user())
+
+
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    flash("Logged out successfully.", "success")
+    return redirect(url_for("home"))
 
 
 @app.route("/analyze", methods=["GET", "POST"])
@@ -250,15 +327,23 @@ def analyze():
         else:
             sentiment, confidence = predict_sentiment(review_text)
             created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            reviewer_name = current_user()["name"]
             with get_connection() as conn:
                 conn.execute(
                     """
                     INSERT INTO analyses (
                         product_name, review_text, predicted_sentiment,
-                        confidence, created_at
-                    ) VALUES (?, ?, ?, ?, ?)
+                        confidence, created_at, reviewer_name
+                    ) VALUES (?, ?, ?, ?, ?, ?)
                     """,
-                    (product_name, review_text, sentiment, confidence, created_at),
+                    (
+                        product_name,
+                        review_text,
+                        sentiment,
+                        confidence,
+                        created_at,
+                        reviewer_name,
+                    ),
                 )
 
             # Ensure template gets numeric confidence
@@ -322,17 +407,44 @@ def reviews():
         rows = conn.execute(query, [*params, per_page, offset]).fetchall()
         analyzed_reviews = conn.execute(
             """
-            SELECT product_name, review_text, predicted_sentiment, confidence, created_at
+            SELECT product_name, review_text, predicted_sentiment, confidence,
+                   created_at, reviewer_name
             FROM analyses
             ORDER BY id DESC
             LIMIT 10
             """
         ).fetchall()
+        analytics = {
+            "positive": conn.execute(
+                "SELECT COUNT(*) FROM reviews WHERE score = 'Positive'"
+            ).fetchone()[0],
+            "negative": conn.execute(
+                "SELECT COUNT(*) FROM reviews WHERE score = 'Negative'"
+            ).fetchone()[0],
+            "analyzed_positive": conn.execute(
+                "SELECT COUNT(*) FROM analyses WHERE predicted_sentiment = 'Positive'"
+            ).fetchone()[0],
+            "analyzed_negative": conn.execute(
+                "SELECT COUNT(*) FROM analyses WHERE predicted_sentiment = 'Negative'"
+            ).fetchone()[0],
+        }
+        analytics["total"] = analytics["positive"] + analytics["negative"]
+        analytics["positive_percent"] = (
+            round((analytics["positive"] / analytics["total"]) * 100, 1)
+            if analytics["total"]
+            else 0
+        )
+        analytics["negative_percent"] = (
+            round((analytics["negative"] / analytics["total"]) * 100, 1)
+            if analytics["total"]
+            else 0
+        )
 
     return render_template(
         "reviews.html",
         reviews=rows,
         analyzed_reviews=analyzed_reviews,
+        analytics=analytics,
         sentiment=sentiment,
         search=search,
         sort=sort,
