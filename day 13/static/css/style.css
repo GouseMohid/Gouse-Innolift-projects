@@ -609,6 +609,46 @@ textarea {
     overflow: hidden;
 }
 
+.analyzed-card {
+    margin-bottom: 28px;
+}
+
+.analysis-history {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 22px 24px;
+}
+
+.analysis-history-card {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px;
+    background: #f8fafc;
+}
+
+.analysis-history-card div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.analysis-history-card p {
+    display: -webkit-box;
+    overflow: hidden;
+    margin-bottom: 10px;
+    color: var(--muted);
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.analysis-history-card small {
+    color: var(--muted);
+    font-weight: 800;
+}
+
 .table-header,
 .pagination-bar {
     display: flex;
@@ -783,6 +823,7 @@ tbody tr:hover {
     .preview-grid,
     .stats-grid,
     .feature-grid,
+    .analysis-history,
     .filter-bar {
         grid-template-columns: 1fr;
     }

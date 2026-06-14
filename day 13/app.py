@@ -320,10 +320,19 @@ def reviews():
         page = min(page, total_pages)
         offset = (page - 1) * per_page
         rows = conn.execute(query, [*params, per_page, offset]).fetchall()
+        analyzed_reviews = conn.execute(
+            """
+            SELECT product_name, review_text, predicted_sentiment, confidence, created_at
+            FROM analyses
+            ORDER BY id DESC
+            LIMIT 10
+            """
+        ).fetchall()
 
     return render_template(
         "reviews.html",
         reviews=rows,
+        analyzed_reviews=analyzed_reviews,
         sentiment=sentiment,
         search=search,
         sort=sort,

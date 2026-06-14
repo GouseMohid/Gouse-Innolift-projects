@@ -9,6 +9,31 @@
 </section>
 
 <section class="section dataset-shell">
+    <div class="table-card analyzed-card">
+        <div class="table-header">
+            <div>
+                <p class="eyebrow">Saved Predictions</p>
+                <h2>Recently Analyzed Reviews</h2>
+                <p>Reviews submitted from the Analyze page are saved in SQLite and shown here.</p>
+            </div>
+            <a class="btn primary small" href="{{ url_for('analyze') }}">Analyze Review</a>
+        </div>
+        <div class="analysis-history">
+            {% for item in analyzed_reviews %}
+            <article class="analysis-history-card">
+                <div>
+                    <span class="pill {{ item.predicted_sentiment|lower }}"><i></i>{{ item.predicted_sentiment }}</span>
+                    <strong>{{ item.product_name or "Untitled product" }}</strong>
+                </div>
+                <p>{{ item.review_text }}</p>
+                <small>{{ item.confidence }}% confidence | {{ item.created_at }}</small>
+            </article>
+            {% else %}
+            <p class="empty-state">No analyzed reviews saved yet. Submit one from the Analyze page.</p>
+            {% endfor %}
+        </div>
+    </div>
+
     <form class="filter-bar enterprise-filter" action="{{ url_for('reviews') }}" method="get">
         <input type="search" name="search" placeholder="Search product, summary, or review text" value="{{ search }}">
         <select name="sentiment">
