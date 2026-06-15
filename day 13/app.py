@@ -1,14 +1,24 @@
 import csv
+import json
 import math
 import os
 import pickle
 import re
+import secrets
 import sqlite3
 import tempfile
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlencode
+from urllib.error import HTTPError, URLError
+from urllib.request import ProxyHandler, Request, build_opener
 
 from flask import Flask, flash, redirect, render_template, request, session, url_for
+
+try:
+    from authlib.integrations.flask_client import OAuth
+except ImportError:
+    OAuth = None
 
 try:
     from sklearn.feature_extraction.text import TfidfVectorizer
@@ -34,7 +44,93 @@ CSV_CANDIDATES = [
 CSV_PATH = next((path for path in CSV_CANDIDATES if path.exists()), None)
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "product-review-sentiment-demo"
+app.config["SECRET_KEY"] = os.environ.get(
+    "SECRET_KEY", "product-review-sentiment-local-secret"
+)
+
+DEFAULT_GOOGLE_CLIENT_ID = (
+    "547403952235-13e6g7k202leritj32jp6ckmtqilbssh.apps.googleusercontent.com"
+)
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", DEFAULT_GOOGLE_CLIENT_ID)
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_AUTH_READY = bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)
+oauth = OAuth(app) if OAuth else None
+if GOOGLE_AUTH_READY and oauth:
+    oauth.register(
+        name="google",
+        client_id=GOOGLE_CLIENT_ID,
+        client_secret=GOOGLE_CLIENT_SECRET,
+        server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+        client_kwargs={"scope": "openid email profile"},
+    )
+
+
+def fetch_google_json(request_data):
+    opener = build_opener(ProxyHandler({}))
+    with opener.open(request_data, timeout=20) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+NEGATIVE_TERMS = {
+    "awful",
+    "bad",
+    "broken",
+    "cheap",
+    "damaged",
+    "defective",
+    "disappointed",
+    "disappointing",
+    "fake",
+    "horrible",
+    "poor",
+    "refund",
+    "terrible",
+    "useless",
+    "waste",
+    "worst",
+}
+POSITIVE_TERMS = {
+    "amazing",
+    "awesome",
+    "best",
+    "excellent",
+    "good",
+    "great",
+    "happy",
+    "love",
+    "perfect",
+    "recommend",
+    "satisfied",
+    "sturdy",
+    "works",
+}
+NEGATIVE_PHRASES = {
+    "do not recommend",
+    "dont recommend",
+    "don't recommend",
+    "not good",
+    "not happy",
+    "not satisfied",
+    "not worth",
+    "poor quality",
+    "stopped working",
+    "waste of money",
+    "would not buy",
+}
+POSITIVE_PHRASES = {
+    "highly recommend",
+    "very good",
+    "very happy",
+    "very satisfied",
+    "worth buying",
+    "works great",
+}
+
+POSITIVE_CONFIDENCE_MIN = 90.0
+CONFIDENCE_RANGES = {
+    "Negative": (70.0, 79.0),
+    "Moderate": (80.0, 89.0),
+    "Positive": (91.0, 99.0),
+}
 
 
 
@@ -125,6 +221,60 @@ def seed_reviews(conn):
         )
 
 
+def normalize_review_text(review_text: str):
+    return re.sub(r"[^a-z0-9']+", " ", (review_text or "").lower()).strip()
+
+
+def keyword_sentiment(review_text: str):
+    text = normalize_review_text(review_text)
+    if not text:
+        return None
+
+    negative_score = sum(2 for phrase in NEGATIVE_PHRASES if phrase in text)
+    positive_score = sum(2 for phrase in POSITIVE_PHRASES if phrase in text)
+    words = re.findall(r"[a-z0-9']+", text)
+
+    for index, word in enumerate(words):
+        previous = words[max(0, index - 3):index]
+        is_negated = any(token in {"no", "not", "never", "dont", "don't"} for token in previous)
+
+        if word in NEGATIVE_TERMS:
+            negative_score += 1
+        if word in POSITIVE_TERMS:
+            if is_negated:
+                negative_score += 2
+            else:
+                positive_score += 1
+
+    if positive_score and negative_score:
+        confidence = min(89.0, 64.0 + (positive_score + negative_score) * 4)
+        return "Moderate", confidence
+    if negative_score >= positive_score + 2:
+        confidence = min(96.0, 68.0 + (negative_score - positive_score) * 7)
+        return "Negative", confidence
+    if positive_score >= negative_score + 2:
+        confidence = min(96.0, 68.0 + (positive_score - negative_score) * 7)
+        return "Positive", confidence
+    return None
+
+
+def apply_sentiment_policy(sentiment: str, confidence: float):
+    confidence = float(confidence)
+    if sentiment == "Positive" and confidence <= POSITIVE_CONFIDENCE_MIN:
+        sentiment = "Moderate"
+
+    lower, upper = CONFIDENCE_RANGES.get(sentiment, (50.0, 99.0))
+    confidence = min(upper, max(lower, confidence))
+    return sentiment, confidence
+
+
+def model_has_binary_classes(model):
+    classes = getattr(model, "classes_", None)
+    if classes is None and hasattr(model, "named_steps"):
+        classifier = model.named_steps.get("classifier")
+        classes = getattr(classifier, "classes_", None)
+    return classes is not None and {"Positive", "Negative"}.issubset({str(item) for item in classes})
+
 
 # --- ML integration (.pkl model inference) ---
 
@@ -168,7 +318,9 @@ def load_model():
         try:
             with MODEL_PATH.open("rb") as model_file:
                 MODEL = pickle.load(model_file)
-                return MODEL
+                if model_has_binary_classes(MODEL):
+                    return MODEL
+                MODEL = None
         except Exception:
             MODEL = None
 
@@ -177,22 +329,22 @@ def load_model():
 
 
 def predict_sentiment(review_text: str):
+    rule_prediction = keyword_sentiment(review_text)
+    if rule_prediction is not None:
+        sentiment, confidence = rule_prediction
+        sentiment, confidence = apply_sentiment_policy(sentiment, confidence)
+        return sentiment, round(confidence, 1)
+
     model = load_model()
     if model is None:
-        text = (review_text or "").lower()
-        negative_words = {"terrible", "worst", "broken", "bad", "awful", "poor", "disappointed"}
-        positive_words = {"great", "perfect", "amazing", "excellent", "love", "sturdy", "works"}
-        negative_hits = sum(word in text for word in negative_words)
-        positive_hits = sum(word in text for word in positive_words)
-        sentiment = "Negative" if negative_hits > positive_hits else "Positive"
-        confidence = 65.0 if negative_hits or positive_hits else 50.0
-        return sentiment, confidence
+        return "Moderate", 50.0
 
     sentiment = str(model.predict([review_text])[0])
     confidence = 50.0
     if hasattr(model, "predict_proba"):
         probabilities = model.predict_proba([review_text])[0]
         confidence = float(max(probabilities) * 100)
+    sentiment, confidence = apply_sentiment_policy(sentiment, confidence)
     return sentiment, round(confidence, 1)
 
 
@@ -239,6 +391,7 @@ def current_user():
             "email": "",
             "phone": "",
             "auth_method": "Guest",
+            "picture": "",
         },
     )
 
@@ -258,44 +411,113 @@ def home():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        auth_method = request.form.get("auth_method", "phone")
-        if auth_method == "google":
-            name = request.form.get("name", "").strip() or "Google Reviewer"
-            email = request.form.get("email", "").strip() or "reviewer@gmail.com"
-            session["user"] = {
-                "name": name,
-                "email": email,
-                "phone": "",
-                "auth_method": "Google",
-            }
-        else:
-            name = request.form.get("name", "").strip() or "Phone Reviewer"
-            phone = request.form.get("phone", "").strip()
-            if len(phone) < 10:
-                flash("Please enter a valid phone number.", "error")
-                return render_template("login.html")
-            session["user"] = {
-                "name": name,
-                "email": "",
-                "phone": phone,
-                "auth_method": "Phone",
-            }
+        name = request.form.get("name", "").strip() or "Phone Reviewer"
+        phone = request.form.get("phone", "").strip()
+        if len(phone) < 10:
+            flash("Please enter a valid phone number.", "error")
+            return render_template("login.html", google_auth_ready=GOOGLE_AUTH_READY)
+        session["user"] = {
+            "name": name,
+            "email": "",
+            "phone": phone,
+            "auth_method": "Phone",
+            "picture": "",
+        }
 
         flash("Authentication successful.", "success")
         return redirect(url_for("profile"))
 
-    return render_template("login.html")
+    return render_template("login.html", google_auth_ready=GOOGLE_AUTH_READY)
 
 
-@app.route("/demo-google-login")
-def demo_google_login():
+@app.route("/auth/google")
+def google_login():
+    if not GOOGLE_AUTH_READY:
+        flash(
+            "Real Google login is not configured. Add the Google Client ID and Client Secret, then restart the app.",
+            "error",
+        )
+        return redirect(url_for("login"))
+    redirect_uri = url_for("google_callback", _external=True)
+    if oauth:
+        return oauth.google.authorize_redirect(redirect_uri)
+
+    state = secrets.token_urlsafe(24)
+    session["google_oauth_state"] = state
+    params = {
+        "client_id": GOOGLE_CLIENT_ID,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "state": state,
+        "access_type": "online",
+        "prompt": "select_account",
+    }
+    return redirect("https://accounts.google.com/o/oauth2/v2/auth?" + urlencode(params))
+
+
+@app.route("/auth/google/callback")
+def google_callback():
+    if not GOOGLE_AUTH_READY:
+        flash("Google authentication is not configured.", "error")
+        return redirect(url_for("login"))
+    if oauth:
+        token = oauth.google.authorize_access_token()
+        user_info = token.get("userinfo") or oauth.google.userinfo()
+    else:
+        if request.args.get("state") != session.pop("google_oauth_state", None):
+            flash("Google authentication state did not match. Please try again.", "error")
+            return redirect(url_for("login"))
+        code = request.args.get("code")
+        if not code:
+            flash("Google did not return an authorization code.", "error")
+            return redirect(url_for("login"))
+
+        token_payload = urlencode(
+            {
+                "code": code,
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+                "redirect_uri": url_for("google_callback", _external=True),
+                "grant_type": "authorization_code",
+            }
+        ).encode("utf-8")
+        token_request = Request(
+            "https://oauth2.googleapis.com/token",
+            data=token_payload,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            method="POST",
+        )
+        try:
+            token = fetch_google_json(token_request)
+        except HTTPError as error:
+            flash(f"Google rejected the login request: HTTP {error.code}. Check the authorized redirect URI.", "error")
+            return redirect(url_for("login"))
+        except URLError as error:
+            flash(f"Could not connect to Google login servers: {error.reason}. Check internet, proxy, or firewall settings.", "error")
+            return redirect(url_for("login"))
+
+        user_request = Request(
+            "https://www.googleapis.com/oauth2/v3/userinfo",
+            headers={"Authorization": f"Bearer {token['access_token']}"},
+        )
+        try:
+            user_info = fetch_google_json(user_request)
+        except HTTPError as error:
+            flash(f"Google profile request failed: HTTP {error.code}. Please try signing in again.", "error")
+            return redirect(url_for("login"))
+        except URLError as error:
+            flash(f"Could not load your Google profile: {error.reason}. Check internet, proxy, or firewall settings.", "error")
+            return redirect(url_for("login"))
+
     session["user"] = {
-        "name": "Google Demo Reviewer",
-        "email": "reviewer@gmail.com",
+        "name": user_info.get("name") or "Google Reviewer",
+        "email": user_info.get("email", ""),
         "phone": "",
         "auth_method": "Google",
+        "picture": user_info.get("picture", ""),
     }
-    flash("Google demo authentication successful.", "success")
+    flash("Google authentication successful.", "success")
     return redirect(url_for("profile"))
 
 
@@ -380,7 +602,7 @@ def reviews():
     filters = []
     params = []
 
-    if sentiment in {"Positive", "Negative"}:
+    if sentiment in {"Positive", "Negative", "Moderate"}:
         filters.append("score = ?")
         params.append(sentiment)
     if search:
@@ -426,6 +648,9 @@ def reviews():
             ).fetchone()[0],
             "analyzed_negative": conn.execute(
                 "SELECT COUNT(*) FROM analyses WHERE predicted_sentiment = 'Negative'"
+            ).fetchone()[0],
+            "analyzed_moderate": conn.execute(
+                "SELECT COUNT(*) FROM analyses WHERE predicted_sentiment = 'Moderate'"
             ).fetchone()[0],
         }
         analytics["total"] = analytics["positive"] + analytics["negative"]

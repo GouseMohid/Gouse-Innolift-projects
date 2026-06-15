@@ -35,6 +35,7 @@
                 <article><span>Average Negative Share</span><strong>{{ analytics.negative_percent }}%</strong></article>
                 <article><span>Saved Positive Analyses</span><strong>{{ analytics.analyzed_positive }}</strong></article>
                 <article><span>Saved Negative Analyses</span><strong>{{ analytics.analyzed_negative }}</strong></article>
+                <article><span>Saved Moderate Analyses</span><strong>{{ analytics.analyzed_moderate }}</strong></article>
             </div>
         </div>
     </div>
@@ -73,6 +74,7 @@
         <select name="sentiment">
             <option {{ "selected" if sentiment == "All" else "" }}>All</option>
             <option {{ "selected" if sentiment == "Positive" else "" }}>Positive</option>
+            <option {{ "selected" if sentiment == "Moderate" else "" }}>Moderate</option>
             <option {{ "selected" if sentiment == "Negative" else "" }}>Negative</option>
         </select>
         <select name="sort">

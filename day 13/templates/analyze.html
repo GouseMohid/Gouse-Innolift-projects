@@ -60,6 +60,9 @@
                 {% if result.sentiment == "Positive" %}
                     <p>Use this review as social proof and identify the product strengths customers mention most.</p>
                     <p>Route praise themes into product-page copy and campaign messaging.</p>
+                {% elif result.sentiment == "Moderate" %}
+                    <p>Review contains mixed signals or balanced feedback, so route it for closer product-team review.</p>
+                    <p>Compare the positive and negative phrases before deciding whether it should become public proof.</p>
                 {% else %}
                     <p>Flag this review for quality review, support follow-up, or expectation alignment.</p>
                     <p>Compare recurring negative terms against product, packaging, and delivery workflows.</p>

@@ -10,7 +10,11 @@
 
 <section class="section two-column">
     <div class="info-card profile-card">
-        <div class="profile-avatar">{{ user.name[:1] }}</div>
+        {% if user.picture %}
+            <img class="profile-photo" src="{{ user.picture }}" alt="{{ user.name }} profile photo">
+        {% else %}
+            <div class="profile-avatar">{{ user.name[:1] }}</div>
+        {% endif %}
         <h2>{{ user.name }}</h2>
         <p><strong>Authentication:</strong> {{ user.auth_method }}</p>
         {% if user.email %}<p><strong>Email:</strong> {{ user.email }}</p>{% endif %}
