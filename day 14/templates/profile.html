@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% set title = "Profile | ReviewPulse AI" %}
+
+{% block content %}
+<section class="page-banner">
+    <p class="eyebrow">Reviewer Profile</p>
+    <h1>{{ user.name }}</h1>
+    <p>Your reviewer profile is attached to new reviews analyzed from this session.</p>
+</section>
+
+<section class="section two-column">
+    <div class="info-card profile-card">
+        {% if user.picture %}
+            <img class="profile-photo" src="{{ user.picture }}" alt="{{ user.name }} profile photo">
+        {% else %}
+            <div class="profile-avatar">{{ user.name[:1] }}</div>
+        {% endif %}
+        <h2>{{ user.name }}</h2>
+        <p><strong>Authentication:</strong> {{ user.auth_method }}</p>
+        {% if user.email %}<p><strong>Email:</strong> {{ user.email }}</p>{% endif %}
+        {% if user.phone %}<p><strong>Phone:</strong> {{ user.phone }}</p>{% endif %}
+        <div class="form-actions">
+            <a class="btn primary" href="{{ url_for('analyze') }}">Analyze Review</a>
+            {% if user.auth_method == "Guest" %}
+                <a class="btn light" href="{{ url_for('login') }}">Login</a>
+            {% else %}
+                <a class="btn light" href="{{ url_for('logout') }}">Logout</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="info-card">
+        <h2>How this is used</h2>
+        <p>
+            When you submit a review from the Analyze page, the app saves the review,
+            prediction, confidence score, date, and reviewer name in SQLite.
+        </p>
+        <p>Open the Reviews page to see saved reviewer details and analytics.</p>
+    </div>
+</section>
+{% endblock %}

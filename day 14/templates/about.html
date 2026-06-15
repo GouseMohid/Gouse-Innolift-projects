@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% set title = "About | ReviewPulse AI" %}
+
+{% block content %}
+<section class="page-banner enterprise-banner">
+    <p class="eyebrow">Platform Overview</p>
+    <h1>AI-powered product review intelligence</h1>
+    <p>ReviewPulse AI demonstrates how a Flask application can transform raw customer feedback into measurable sentiment analytics and operational insight.</p>
+</section>
+
+<section class="section about-overview">
+    <div>
+        <p class="eyebrow">Project Overview</p>
+        <h2>From academic classifier to business-ready analytics workflow</h2>
+        <p>
+            The application imports e-commerce review data, stores it in SQLite, trains a
+            lightweight text classifier, and exposes a polished interface for prediction,
+            browsing, and sentiment monitoring.
+        </p>
+    </div>
+</section>
+
+<section class="section feature-grid">
+    <article class="feature-card enterprise-card">
+        <span class="feature-icon">01</span>
+        <h3>Import Reviews</h3>
+        <p>Load product IDs, summaries, helpfulness scores, review text, and sentiment labels from the dataset.</p>
+    </article>
+    <article class="feature-card enterprise-card">
+        <span class="feature-icon">02</span>
+        <h3>Prepare Text</h3>
+        <p>Tokenize review content, remove common stop words, and build a vocabulary for classification.</p>
+    </article>
+    <article class="feature-card enterprise-card">
+        <span class="feature-icon">03</span>
+        <h3>Predict Sentiment</h3>
+        <p>Score submitted reviews as Positive above 90%, Moderate from 80-89%, or Negative from 70-79%.</p>
+    </article>
+    <article class="feature-card enterprise-card">
+        <span class="feature-icon">04</span>
+        <h3>Store Insights</h3>
+        <p>Save prediction history with confidence values for dashboard visibility and later review.</p>
+    </article>
+</section>
+
+<section class="section two-column">
+    <div class="showcase-copy">
+        <p class="eyebrow">AI Prediction Process</p>
+        <h2>How the model turns text into a business signal</h2>
+    </div>
+    <div class="info-card">
+        <p><strong>1. Review Text:</strong> The user submits product feedback from the analyzer form.</p>
+        <p><strong>2. Vectorization:</strong> The saved TF-IDF pipeline converts text into ML features.</p>
+        <p><strong>3. Prediction:</strong> The classifier predicts positive, moderate, or negative sentiment.</p>
+        <p><strong>4. Output:</strong> The app displays sentiment, confidence, and suggested insights.</p>
+    </div>
+</section>
+
+<section class="section feature-grid">
+    <article class="feature-card"><span>ML</span><h3>Machine Learning Powered</h3><p>Trained from labeled product reviews.</p></article>
+    <article class="feature-card"><span>FP</span><h3>Fast Processing</h3><p>Instant classifier response from the Flask backend.</p></article>
+    <article class="feature-card"><span>DB</span><h3>Secure Data Handling</h3><p>Local SQLite persistence for reviews and analyses.</p></article>
+    <article class="feature-card"><span>BI</span><h3>Business Focused</h3><p>Designed for review operations and final presentation.</p></article>
+</section>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold mb-4">About the Project</h1>
+        <p class="text-xl text-gray-400">Enterprise-grade Sentiment Analysis driven by Machine Learning.</p>
+    </div>
+
+    <div class="space-y-12">
+        <div class="glass p-8 rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300">
+            <h2 class="text-2xl font-bold text-cyan mb-4 flex items-center gap-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Project Overview
+            </h2>
+            <p class="text-gray-300 leading-relaxed">
+                The Amazon Reviews Sentiment Analysis platform is an advanced Machine Learning application designed to predict customer sentiment directly from product reviews. By processing raw textual feedback and generating accurate positive or negative classifications, this tool enables businesses to monitor product performance efficiently, understand user satisfaction, and quickly respond to customer needs.
+            </p>
+        </div>
+
+        <div class="glass p-8 rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300">
+            <h2 class="text-2xl font-bold text-cyan mb-4 flex items-center gap-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                Technology Stack
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                <div class="bg-black/20 p-4 rounded-lg text-center border border-white/5 shadow-inner">
+                    <div class="font-bold">Python</div>
+                    <div class="text-xs text-gray-500">Core Language</div>
+                </div>
+                <div class="bg-black/20 p-4 rounded-lg text-center border border-white/5 shadow-inner">
+                    <div class="font-bold">Flask</div>
+                    <div class="text-xs text-gray-500">Web Backend</div>
+                </div>
+                <div class="bg-black/20 p-4 rounded-lg text-center border border-white/5 shadow-inner">
+                    <div class="font-bold">Scikit-Learn</div>
+                    <div class="text-xs text-gray-500">Machine Learning</div>
+                </div>
+                <div class="bg-black/20 p-4 rounded-lg text-center border border-white/5 shadow-inner">
+                    <div class="font-bold">TailwindCSS</div>
+                    <div class="text-xs text-gray-500">UI / Styling</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="glass p-8 rounded-2xl border border-cyan-500/30 text-center shadow-[0_0_30px_rgba(6,182,212,0.15)] relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-600/10"></div>
+            <h2 class="text-2xl font-bold mb-4 relative z-10">Ready for Production</h2>
+            <p class="text-gray-300 mb-6 max-w-2xl mx-auto relative z-10">Our model integrates seamlessly with existing enterprise systems to provide robust, scalable, and low-latency predictions.</p>
+            <a href="/analyze" class="relative z-10 inline-block bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3 px-8 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all transform hover:-translate-y-1">Try it Now</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

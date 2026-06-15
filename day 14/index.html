@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 relative z-10">
+        <div class="text-center">
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
+                Transform Customer Feedback into <br> <span class="gradient-text">Actionable Insights</span>
+            </h1>
+            <p class="mt-4 max-w-2xl text-xl text-gray-300 mx-auto mb-10">
+                Leverage advanced AI and Machine Learning to automatically classify product reviews, detect trends, and empower your business decisions with high-accuracy sentiment analytics.
+            </p>
+            <div class="flex justify-center gap-4">
+                <a href="/analyze" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3 px-8 rounded-lg shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] transition-all transform hover:-translate-y-1">Analyze Reviews</a>
+                <a href="#dashboard" class="glass hover:bg-white/5 text-white font-bold py-3 px-8 rounded-lg transition-all border border-white/10 hover:border-white/20">View Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="py-16 border-y border-white/5 bg-white/[0.02] backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+            <div class="glass p-6 rounded-xl transform hover:-translate-y-2 transition-all hover:border-cyan-500/30 hover:shadow-[0_0_30px_rgba(6,182,212,0.1)]">
+                <div class="text-4xl font-bold text-cyan mb-2">500k+</div>
+                <div class="text-gray-400 text-sm uppercase tracking-wide">Reviews Processed</div>
+            </div>
+            <div class="glass p-6 rounded-xl transform hover:-translate-y-2 transition-all hover:border-success/30 hover:shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+                <div class="text-4xl font-bold text-success mb-2">68%</div>
+                <div class="text-gray-400 text-sm uppercase tracking-wide">Positive Sentiment</div>
+            </div>
+            <div class="glass p-6 rounded-xl transform hover:-translate-y-2 transition-all hover:border-negative/30 hover:shadow-[0_0_30px_rgba(239,68,68,0.1)]">
+                <div class="text-4xl font-bold text-negative mb-2">12%</div>
+                <div class="text-gray-400 text-sm uppercase tracking-wide">Negative Sentiment</div>
+            </div>
+            <div class="glass p-6 rounded-xl transform hover:-translate-y-2 transition-all hover:border-cyan-500/30 hover:shadow-[0_0_30px_rgba(6,182,212,0.1)]">
+                <div class="text-4xl font-bold text-cyan mb-2">94.2%</div>
+                <div class="text-gray-400 text-sm uppercase tracking-wide">Prediction Accuracy</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-center mb-12">Enterprise Features</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="glass p-8 rounded-2xl hover:border-cyan-500/50 hover:bg-white/5 transition-all duration-300">
+                <h3 class="text-xl font-bold mb-3 text-cyan">AI Sentiment Analysis</h3>
+                <p class="text-gray-400">Instantly classify vast amounts of reviews into Positive, Neutral, or Negative using NLP.</p>
+            </div>
+            <div class="glass p-8 rounded-2xl hover:border-cyan-500/50 hover:bg-white/5 transition-all duration-300">
+                <h3 class="text-xl font-bold mb-3 text-cyan">Real-Time Predictions</h3>
+                <p class="text-gray-400">Process incoming customer feedback on the fly with low-latency machine learning models.</p>
+            </div>
+            <div class="glass p-8 rounded-2xl hover:border-cyan-500/50 hover:bg-white/5 transition-all duration-300">
+                <h3 class="text-xl font-bold mb-3 text-cyan">Automated Insights</h3>
+                <p class="text-gray-400">Generate actionable reports and detect emerging product trends without manual analysis.</p>
+            </div>
+            <div class="glass p-8 rounded-2xl hover:border-cyan-500/50 hover:bg-white/5 transition-all duration-300">
+                <h3 class="text-xl font-bold mb-3 text-cyan">Secure Data Storage</h3>
+                <p class="text-gray-400">Enterprise-grade security ensuring your dataset and customer information remain private.</p>
+            </div>
+            <div class="glass p-8 rounded-2xl hover:border-cyan-500/50 hover:bg-white/5 transition-all duration-300">
+                <h3 class="text-xl font-bold mb-3 text-cyan">Review Classification</h3>
+                <p class="text-gray-400">Categorize multi-dimensional reviews to pinpoint exact areas of product improvement.</p>
+            </div>
+            <div class="glass p-8 rounded-2xl hover:border-cyan-500/50 hover:bg-white/5 transition-all duration-300">
+                <h3 class="text-xl font-bold mb-3 text-cyan">Analytics Dashboard</h3>
+                <p class="text-gray-400">Visualize massive datasets with interactive charts, graphs, and distribution metrics.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="dashboard" class="py-20 border-t border-white/5 bg-white/[0.02] backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-center mb-12">Dashboard Preview</h2>
+        <div class="glass rounded-2xl p-4 md:p-8 shadow-2xl shadow-black/50 border border-white/10">
+            <!-- Mockup Dashboard -->
+            <div class="flex items-center gap-2 mb-6 pb-4 border-b border-white/10">
+                <div class="w-3 h-3 rounded-full bg-negative"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-success"></div>
+                <span class="ml-2 text-xs text-gray-500 font-mono">analytics-dashboard.exe</span>
+            </div>
+            <div class="flex flex-col md:flex-row gap-6">
+                <div class="flex-1 bg-black/20 rounded-xl p-6 border border-white/5 flex items-center justify-center min-h-[300px] shadow-inner">
+                    <div class="text-center">
+                        <div class="w-48 h-48 rounded-full border-8 border-cyan border-t-success border-l-negative mx-auto mb-4 animate-spin-slow"></div>
+                        <p class="text-gray-400">Sentiment Distribution Chart</p>
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col gap-6">
+                    <div class="bg-black/20 rounded-xl p-6 border border-white/5 flex-1 shadow-inner">
+                        <div class="h-4 bg-white/10 rounded w-1/3 mb-4"></div>
+                        <div class="space-y-3">
+                            <div class="h-2 bg-success rounded w-full"></div>
+                            <div class="h-2 bg-success rounded w-4/5"></div>
+                            <div class="h-2 bg-negative rounded w-1/4"></div>
+                            <div class="h-2 bg-cyan rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="bg-black/20 rounded-xl p-6 border border-white/5 flex-1 shadow-inner">
+                         <h4 class="font-bold text-white mb-2">AI-Generated Insights</h4>
+                         <ul class="text-sm text-gray-400 space-y-2 list-disc list-inside">
+                             <li>Significant rise in positive feedback regarding battery life.</li>
+                             <li>Shipping delays are causing a spike in negative sentiment.</li>
+                             <li>Overall brand satisfaction remains high at 88%.</li>
+                         </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

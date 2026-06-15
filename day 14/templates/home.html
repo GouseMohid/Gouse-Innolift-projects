@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% set title = "ReviewPulse AI | Product Review Sentiment Analyzer" %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content hero-grid">
+        <div>
+            <p class="eyebrow">AI Review Intelligence</p>
+            <h1>Transform Customer Feedback into Actionable Insights</h1>
+            <p class="hero-text">
+                Analyze product reviews, predict sentiment with a trained ML model, and explore
+                customer feedback trends from a clean business dashboard.
+            </p>
+            <div class="hero-actions">
+                <a class="btn primary" href="{{ url_for('analyze') }}">Analyze Reviews</a>
+                <a class="btn secondary" href="{{ url_for('reviews') }}">View Dataset</a>
+            </div>
+        </div>
+
+        <div class="dashboard-preview" aria-label="Sentiment analytics dashboard preview">
+            <div class="preview-header">
+                <strong>Sentiment Dashboard</strong>
+                <span>Live</span>
+            </div>
+            <div class="preview-grid">
+                <div class="preview-card">
+                    <p>Positive Sentiment</p>
+                    <strong>{{ stats.positive_percent }}%</strong>
+                    <div class="mini-bars"><i></i><i></i><i></i><i></i><i></i></div>
+                </div>
+                <div class="preview-card">
+                    <p>Negative Sentiment</p>
+                    <strong>{{ stats.negative_percent }}%</strong>
+                    <div class="donut-chart" style="--value: {{ stats.positive_percent }}%"></div>
+                </div>
+                <div class="preview-card wide">
+                    <p>AI Insight</p>
+                    <h3>Review quality signals are ready for analysis.</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section stats-grid">
+    <article class="stat-card">
+        <span>Total Reviews Processed</span>
+        <strong>{{ stats.total }}</strong>
+        <p>Imported records available for browsing and model training.</p>
+    </article>
+    <article class="stat-card positive">
+        <span>Positive Sentiment</span>
+        <strong>{{ stats.positive_percent }}%</strong>
+        <p>{{ stats.positive }} reviews classified as positive.</p>
+    </article>
+    <article class="stat-card negative">
+        <span>Negative Sentiment</span>
+        <strong>{{ stats.negative_percent }}%</strong>
+        <p>{{ stats.negative }} reviews flagged as negative.</p>
+    </article>
+    <article class="stat-card">
+        <span>Prediction Accuracy</span>
+        <strong>{{ stats.accuracy_percent }}%</strong>
+        <p>Demo readiness metric for final presentation.</p>
+    </article>
+</section>
+
+<section class="section feature-grid">
+    <article class="feature-card">
+        <span>AI</span>
+        <h3>ML Sentiment Prediction</h3>
+        <p>Loads a trained pickle model and predicts sentiment from review text.</p>
+    </article>
+    <article class="feature-card">
+        <span>DB</span>
+        <h3>Dataset Browser</h3>
+        <p>Search, filter, sort, and paginate product review records.</p>
+    </article>
+    <article class="feature-card">
+        <span>UX</span>
+        <h3>Professional Interface</h3>
+        <p>Clean forms, dashboard cards, badges, and responsive layouts.</p>
+    </article>
+    <article class="feature-card">
+        <span>IN</span>
+        <h3>Actionable Insights</h3>
+        <p>Shows confidence scores and suggested next steps after prediction.</p>
+    </article>
+</section>
+
+<section class="section two-column">
+    <div>
+        <p class="eyebrow">Final Demo Ready</p>
+        <h2>Frontend, backend, database, and ML are connected</h2>
+        <p>
+            The app stores reviews in SQLite, trains or loads the sentiment model from
+            <strong>sentiment_model.pkl</strong>, accepts user input, generates predictions,
+            saves analysis history, and displays results in the web interface.
+        </p>
+    </div>
+    <div class="info-card">
+        <h3>Recent Analyses</h3>
+        {% if stats.analyses %}
+            {% for item in stats.analyses[:4] %}
+            <p><strong>{{ item.predicted_sentiment }}</strong> at {{ item.confidence }}% confidence</p>
+            {% endfor %}
+        {% else %}
+            <p>No custom analyses yet. Use the analyzer to create the first result.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

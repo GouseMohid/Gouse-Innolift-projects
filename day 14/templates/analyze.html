@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% set title = "Analyze | ReviewPulse AI" %}
+
+{% block content %}
+<section class="page-banner enterprise-banner">
+    <p class="eyebrow">AI Analysis Desk</p>
+    <h1>Analyze Product Review Sentiment</h1>
+    <p>Paste customer feedback and receive an instant prediction with confidence scoring and business-focused insight prompts.</p>
+</section>
+
+<section class="section analysis-layout enterprise-workspace">
+    <form id="analysisForm" class="analysis-form glass-panel" action="{{ url_for('analyze') }}" method="post">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="notice {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <div class="form-header">
+            <span class="feature-icon">AI</span>
+            <div>
+                <h2>Review Input</h2>
+                <p>Provide a product name and customer review for live sentiment classification.</p>
+            </div>
+        </div>
+
+        <label>
+            Product Name
+            <input id="productName" type="text" name="product_name" placeholder="Example: Wireless headphones" value="{{ product_name }}">
+        </label>
+        <label>
+            Review Text
+            <textarea id="reviewText" name="review_text" rows="12" placeholder="Paste the customer review here..." required>{{ review_text }}</textarea>
+        </label>
+        <div class="form-actions">
+            <button class="btn primary loading-button" type="submit">
+                <span class="button-label">Analyze Sentiment</span>
+                <span class="button-loader" aria-hidden="true"></span>
+            </button>
+            <button class="btn light" type="reset">Clear</button>
+        </div>
+    </form>
+
+    <aside class="result-panel glass-panel insight-panel">
+        {% if result %}
+            <p class="eyebrow">Sentiment Result</p>
+            <h2 class="{{ result.sentiment|lower }}">{{ result.sentiment }}</h2>
+            <p>{{ result.product_name }}</p>
+            <div class="confidence-meter {{ result.sentiment|lower }}" style="--confidence: {{ result.confidence }}%">
+                <div class="confidence-ring" aria-label="{{ result.confidence }} percent confidence">
+                    <strong>{{ result.confidence }}%</strong>
+                    <span>Confidence</span>
+                </div>
+                <div class="confidence-track">
+                    <span style="width: {{ result.confidence }}%"></span>
+                </div>
+            </div>
+            <div class="suggested-insights">
+                <h3>Suggested Insights</h3>
+                {% if result.sentiment == "Positive" %}
+                    <p>Use this review as social proof and identify the product strengths customers mention most.</p>
+                    <p>Route praise themes into product-page copy and campaign messaging.</p>
+                {% elif result.sentiment == "Moderate" %}
+                    <p>Review contains mixed signals or balanced feedback, so route it for closer product-team review.</p>
+                    <p>Compare the positive and negative phrases before deciding whether it should become public proof.</p>
+                {% else %}
+                    <p>Flag this review for quality review, support follow-up, or expectation alignment.</p>
+                    <p>Compare recurring negative terms against product, packaging, and delivery workflows.</p>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="placeholder-graphic enterprise-placeholder" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+                <i></i>
+            </div>
+            <p class="eyebrow">Live Intelligence Panel</p>
+            <h2 id="previewTitle">Ready for analysis</h2>
+            <p id="previewCopy">Type a review to populate the workspace preview before running the prediction model.</p>
+            <div class="preview-meter">
+                <span id="previewFill" style="width: 0%"></span>
+            </div>
+            <div class="suggested-insights">
+                <h3>What appears here</h3>
+                <p>Sentiment result, confidence score, and suggested next steps for business teams.</p>
+            </div>
+        {% endif %}
+    </aside>
+</section>
+
+<script>
+    const reviewText = document.getElementById("reviewText");
+    const productName = document.getElementById("productName");
+    const previewTitle = document.getElementById("previewTitle");
+    const previewCopy = document.getElementById("previewCopy");
+    const previewFill = document.getElementById("previewFill");
+    const analysisForm = document.getElementById("analysisForm");
+
+    function updatePreview() {
+        if (!reviewText || !previewTitle || !previewCopy || !previewFill) {
+            return;
+        }
+        const length = reviewText.value.trim().length;
+        const product = productName.value.trim() || "Untitled product";
+        const progress = Math.min(100, Math.round((length / 220) * 100));
+        previewFill.style.width = `${progress}%`;
+        previewTitle.textContent = length ? product : "Ready for analysis";
+        previewCopy.textContent = length
+            ? `${length} characters captured. Submit to generate confidence and insights.`
+            : "Type a review to populate the workspace preview before running the prediction model.";
+    }
+
+    updatePreview();
+    reviewText?.addEventListener("input", updatePreview);
+    productName?.addEventListener("input", updatePreview);
+    analysisForm?.addEventListener("submit", () => {
+        analysisForm.classList.add("is-loading");
+    });
+</script>
+{% endblock %}

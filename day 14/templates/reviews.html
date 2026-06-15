@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% set title = "Reviews | ReviewPulse AI" %}
+
+{% block content %}
+<section class="page-banner enterprise-banner">
+    <p class="eyebrow">Dataset Management</p>
+    <h1>Product Review Intelligence Browser</h1>
+    <p>Search, filter, sort, and inspect imported Amazon product review records from a clean analytics workspace.</p>
+</section>
+
+<section class="section dataset-shell">
+    <div class="table-card analytics-card">
+        <div class="table-header">
+            <div>
+                <p class="eyebrow">Sentiment Analytics</p>
+                <h2>Positive vs Negative Review Graph</h2>
+                <p>Dataset sentiment distribution and analyzed review totals.</p>
+            </div>
+        </div>
+        <div class="analytics-grid">
+            <div class="analytics-bars">
+                <div>
+                    <span>Positive Reviews</span>
+                    <strong>{{ analytics.positive }}</strong>
+                    <div class="bar-track"><i class="positive-bar" style="width: {{ analytics.positive_percent }}%"></i></div>
+                </div>
+                <div>
+                    <span>Negative Reviews</span>
+                    <strong>{{ analytics.negative }}</strong>
+                    <div class="bar-track"><i class="negative-bar" style="width: {{ analytics.negative_percent }}%"></i></div>
+                </div>
+            </div>
+            <div class="analytics-summary">
+                <article><span>Average Positive Share</span><strong>{{ analytics.positive_percent }}%</strong></article>
+                <article><span>Average Negative Share</span><strong>{{ analytics.negative_percent }}%</strong></article>
+                <article><span>Saved Positive Analyses</span><strong>{{ analytics.analyzed_positive }}</strong></article>
+                <article><span>Saved Negative Analyses</span><strong>{{ analytics.analyzed_negative }}</strong></article>
+                <article><span>Saved Moderate Analyses</span><strong>{{ analytics.analyzed_moderate }}</strong></article>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-card analyzed-card">
+        <div class="table-header">
+            <div>
+                <p class="eyebrow">Saved Predictions</p>
+                <h2>Recently Analyzed Reviews</h2>
+                <p>Reviews submitted from the Analyze page are saved in SQLite and shown here.</p>
+            </div>
+            <a class="btn primary small" href="{{ url_for('analyze') }}">Analyze Review</a>
+        </div>
+        <div class="analysis-history">
+            {% for item in analyzed_reviews %}
+            <article class="analysis-history-card">
+                <div>
+                    <span class="pill {{ item.predicted_sentiment|lower }}"><i></i>{{ item.predicted_sentiment }}</span>
+                    <strong>{{ item.product_name or "Untitled product" }}</strong>
+                </div>
+                <div class="reviewer-line">
+                    <span class="reviewer-avatar">{{ (item.reviewer_name or "G")[:1] }}</span>
+                    <strong>{{ item.reviewer_name or "Guest Reviewer" }}</strong>
+                </div>
+                <p>{{ item.review_text }}</p>
+                <small>{{ item.confidence }}% confidence | {{ item.created_at }}</small>
+            </article>
+            {% else %}
+            <p class="empty-state">No analyzed reviews saved yet. Submit one from the Analyze page.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <form class="filter-bar enterprise-filter" action="{{ url_for('reviews') }}" method="get">
+        <input type="search" name="search" placeholder="Search product, summary, or review text" value="{{ search }}">
+        <select name="sentiment">
+            <option {{ "selected" if sentiment == "All" else "" }}>All</option>
+            <option {{ "selected" if sentiment == "Positive" else "" }}>Positive</option>
+            <option {{ "selected" if sentiment == "Moderate" else "" }}>Moderate</option>
+            <option {{ "selected" if sentiment == "Negative" else "" }}>Negative</option>
+        </select>
+        <select name="sort">
+            <option value="newest" {{ "selected" if sort == "newest" else "" }}>Newest first</option>
+            <option value="oldest" {{ "selected" if sort == "oldest" else "" }}>Oldest first</option>
+            <option value="helpful" {{ "selected" if sort == "helpful" else "" }}>Most helpful</option>
+            <option value="product" {{ "selected" if sort == "product" else "" }}>Product A-Z</option>
+        </select>
+        <button class="btn secondary" type="submit">Apply Filters</button>
+    </form>
+
+    <div class="table-card enterprise-table">
+        <div class="table-header">
+            <div>
+                <p class="eyebrow">Review Operations</p>
+                <h2>Review List</h2>
+                <p>Showing {{ reviews|length }} of {{ total }} matching records</p>
+            </div>
+            <a class="btn primary small" href="{{ url_for('analyze') }}">Analyze New</a>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Sentiment</th>
+                        <th>Summary & Review</th>
+                        <th>Reviewer</th>
+                        <th>Helpful</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for review in reviews %}
+                    <tr>
+                        <td><strong>{{ review.product_id }}</strong></td>
+                        <td><span class="pill {{ review.score|lower }}"><i></i>{{ review.score }}</span></td>
+                        <td>
+                            <strong>{{ review.summary }}</strong>
+                            {% if review.text|length > 150 %}
+                                <details class="review-text">
+                                    <summary>
+                                        <span>{{ review.text }}</span>
+                                        <em></em>
+                                    </summary>
+                                    <p>{{ review.text }}</p>
+                                </details>
+                            {% else %}
+                                <p class="review-text short">{{ review.text }}</p>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="reviewer-line">
+                                <span class="reviewer-avatar">{{ (review.profile_name or "A")[:1] }}</span>
+                                <strong>{{ review.profile_name or "Anonymous" }}</strong>
+                            </div>
+                            <small>{{ review.user_id or "No profile ID" }}</small>
+                        </td>
+                        <td>{{ review.helpfulness_numerator }}/{{ review.helpfulness_denominator }}</td>
+                        <td>{{ review.review_time|date_from_epoch }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td class="empty-state" colspan="6">No reviews match your filters.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination-bar">
+            <span>Page {{ page }} of {{ total_pages }}</span>
+            <div>
+                {% if page > 1 %}
+                    <a class="btn light small" href="{{ url_for('reviews', search=search, sentiment=sentiment, sort=sort, page=page-1) }}">Previous</a>
+                {% endif %}
+                {% if page < total_pages %}
+                    <a class="btn light small" href="{{ url_for('reviews', search=search, sentiment=sentiment, sort=sort, page=page+1) }}">Next</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
